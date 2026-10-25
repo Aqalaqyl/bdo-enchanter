@@ -5,4 +5,4 @@ mss>=9.0
 opencv-python>=4.8
 numpy>=1.26
 pytesseract>=0.3.10
-pynput>=1.7.6
+six>=1.16

@@ -1,56 +1,64 @@
-# Example of what `python enchanter.py setup` writes to config.yaml.
-# You normally never edit this by hand: every picture below is cropped by
-# dragging a box on a screenshot during setup, and the failstack region is
-# picked and OCR-verified the same way.
+# What `./enchanter setup` produces. You do not write this by hand: every
+# picture is a box you drew on a screenshot, every flow was recorded while the
+# wizard drove the game. Shown here so you know what the knobs mean.
+
+game_window: Black Desert        # window title fragment; lets me focus the game (xdotool)
 
 targets:
-  PRI: 15      # failstack to build before a PRI attempt
-  DUO: 40      # failstack to build before a DUO attempt
+  PRI: 15                        # failstack built before each PRI attempt
+  DUO: 40                        # failstack built before each DUO attempt
+
+# Recorded menu paths. Steps are {key: ...}, {click: picture}, {wait: seconds}.
+# A click can be optional: true (skipped when the picture is not on screen).
+flows:
+  open_enhancement:              # normal view -> enhancement window + inventory
+  - key: ','
+  - click: templates/open_enhancement_2.png
+  - key: i
+  open_failstack_menu:           # enhancement window -> where Black Stones are consumed ([] if same window)
+  - click: templates/open_failstack_menu_1.png
+  add_failstack:                 # consume ONE Black Stone (+1 failstack)
+  - click: templates/add_failstack_1.png
+  close_failstack_menu:          # back to the enhancement window
+  - click: templates/close_failstack_menu_1.png
+  enhance:                       # press Enhance (+ confirm, marked optional)
+  - click: templates/enhance_1.png
+  - click: templates/enhance_2.png
+    optional: true
+
+anchors:
+  enhancement_open: templates/enhancement_open.png   # proves the window is open
 
 failstack:
-  region: [860, 240, 60, 28]   # [x, y, w, h] of the counter digits (picked in setup)
-  max_overshoot: 3             # stop instead of burning e.g. a 42 stack on a PRI
-  verify_retries: 3
+  region: [195, 106, 50, 40]     # counter digits in the enhancement window [x, y, w, h]
+  menu_region: [425, 276, 50, 40]  # counter inside the failstack menu (optional)
+  max_overshoot: 3               # stop and ask rather than burn e.g. a 30 stack on a PRI
 
-buttons:
-  increase_failstack: {template: templates/increase_failstack.png}
-  confirm_failstack:  {template: templates/confirm_failstack.png, optional: true}
-  enhance:            {template: templates/enhance.png}
-  confirm_enhance:    {template: templates/confirm_enhance.png, optional: true}
-
-# Which mouse button moves an inventory item into the enhancement slot
-# (setup tests this for you).
-select_click: left
+inventory_region: [705, 105, 530, 590]   # items are only searched (and clicked) in here
 
 items:
-  - name: Ogre Ring
-    current: BASE
-    target: DUO
-    count: 2
-    templates:
-      BASE: templates/item_ogre_ring_base.png
-      # PRI: captured automatically the first time a PRI succeeds during a run
-  - name: Tungrad Earring
-    current: BASE
-    target: PRI
-    count: 3
-    templates:
-      BASE: templates/item_tungrad_earring_base.png
+- name: Deboreka Ring
+  pri_count: 2                   # goal for the `pri` phase
+  templates:
+    BASE: templates/item_deboreka_ring_base.png
+    PRI: templates/item_deboreka_ring_pri.png    # captured after the first PRI success
+    DUO: templates/item_deboreka_ring_duo.png    # captured after the first DUO success
+- name: Deboreka Earring
+  pri_count: 1
+  templates:
+    BASE: templates/item_deboreka_earring_base.png
+
+select_click: left               # mouse button that moves an inventory item into the slot
 
 delays:
   after_click: 0.4
-  after_failstack: 0.6   # time for the counter to update after a stone
-  after_enhance: 3.0     # enhancement animation
+  after_key: 0.8
+  after_failstack: 0.5
+  after_enhance: 3.0
   result_timeout: 10.0
 
-match_threshold: 0.85    # minimum picture-match confidence (0-1)
+match_threshold: 0.85            # minimum picture-match confidence (0-1)
 
 hotkeys:
   stop: f9
   pause: f10
-
-# Only used by `python enchanter.py sim`.
-sim:
-  start_failstack: 0
-  black_stones: 300
-  success_rate: {PRI: 0.5, DUO: 0.35}

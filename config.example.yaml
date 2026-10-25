@@ -1,58 +1,49 @@
-# Copy to config.yaml and edit. All screen coordinates are absolute pixels on
-# your primary monitor; all template paths are relative to this file.
+# Example of what `python enchanter.py setup` writes to config.yaml.
+# You normally never edit this by hand: every picture below is cropped by
+# dragging a box on a screenshot during setup, and the failstack region is
+# picked and OCR-verified the same way.
 
-# Path to tesseract.exe (needed for reading the failstack counter).
-tesseract_cmd: "C:/Program Files/Tesseract-OCR/tesseract.exe"
-
-# Failstack required for each enhancement stage.
 targets:
-  PRI: 15
-  DUO: 40
+  PRI: 15      # failstack to build before a PRI attempt
+  DUO: 40      # failstack to build before a DUO attempt
 
 failstack:
-  # Screen region [x, y, width, height] that tightly contains the failstack
-  # number in the Black Spirit enhancement window.
-  region: [860, 240, 60, 28]
-  # If the current stack is higher than any usable target by more than this,
-  # stop and let you decide (e.g. after a DUO fail leaves you on 42 with only
-  # PRI attempts left).
-  max_overshoot: 3
+  region: [860, 240, 60, 28]   # [x, y, w, h] of the counter digits (picked in setup)
+  max_overshoot: 3             # stop instead of burning e.g. a 42 stack on a PRI
   verify_retries: 3
 
-delays:
-  after_click: 0.4
-  after_failstack: 0.6   # time for the counter to update after consuming a stone
-  after_enhance: 3.0     # enhancement animation
-  result_timeout: 10.0
-
-# Minimum template-match confidence (0-1).
-match_threshold: 0.85
-
-# Buttons: either a screenshot crop {template: ...} or fixed {x: ..., y: ...}.
 buttons:
   increase_failstack: {template: templates/increase_failstack.png}
-  confirm_failstack:  {template: templates/confirm.png, optional: true}
+  confirm_failstack:  {template: templates/confirm_failstack.png, optional: true}
   enhance:            {template: templates/enhance.png}
-  confirm_enhance:    {template: templates/confirm.png, optional: true}
+  confirm_enhance:    {template: templates/confirm_enhance.png, optional: true}
 
-# Accessories to work through. Each entry is `count` physical copies that will
-# be enhanced one after another (a failed copy is destroyed and skipped).
-#
-# Give one template per stage so the script does not grab a base copy (your
-# material) when it means to pick the PRI copy.
+# Which mouse button moves an inventory item into the enhancement slot
+# (setup tests this for you).
+select_click: left
+
 items:
-  - name: "Ogre Ring"
-    current: BASE        # BASE or PRI
-    target: DUO          # PRI or DUO
+  - name: Ogre Ring
+    current: BASE
+    target: DUO
     count: 2
     templates:
-      BASE: templates/ogre_ring_base.png
-      PRI:  templates/ogre_ring_pri.png
-  - name: "Tungrad Earring"
+      BASE: templates/item_ogre_ring_base.png
+      # PRI: captured automatically the first time a PRI succeeds during a run
+  - name: Tungrad Earring
     current: BASE
     target: PRI
     count: 3
-    template: templates/tungrad_earring.png   # single template is fine for PRI-only
+    templates:
+      BASE: templates/item_tungrad_earring_base.png
+
+delays:
+  after_click: 0.4
+  after_failstack: 0.6   # time for the counter to update after a stone
+  after_enhance: 3.0     # enhancement animation
+  result_timeout: 10.0
+
+match_threshold: 0.85    # minimum picture-match confidence (0-1)
 
 hotkeys:
   stop: f9
